@@ -3,8 +3,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-
-using namespace std;
+#include <string>
 
 class Config
 {
@@ -12,37 +11,40 @@ public:
     Config();
     ~Config(){};
 
-    void parse_arg(int argc, char*argv[]);
+    void parseArg(int argc, char*argv[]);
+    void print();
 
     //端口号
-    int PORT;
-
-    //日志写入方式
-    int LOGWrite;
+    int port;
 
     //触发组合模式
-    int TRIGMode;
+    int trigMode;
 
-    //listenfd触发模式
-    int LISTENTrigmode;
-
-    //connfd触发模式
-    int CONNTrigmode;
+    //超时时间
+    int timeoutMs;
 
     //优雅关闭链接
-    int OPT_LINGER;
+    bool OptLinger;
+
+    //数据库登录名、密码、数据库名
+    char* sqlUser;
+    char* sqlPwd;
+    char* dbName;
 
     //数据库连接池数量
-    int sql_num;
+    int connPoolNum;
 
     //线程池内的线程数量
-    int thread_num;
+    int threadNum;
 
     //是否关闭日志
-    int close_log;
+    bool openLog;
 
-    //并发模型选择
-    int actor_model;
+    //日志等级
+    int logLevel;
+
+    //消息队列长度
+    int logQueSize;
 };
 
 #endif

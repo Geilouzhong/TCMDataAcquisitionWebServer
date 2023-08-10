@@ -1,86 +1,120 @@
 #include "config.h"
 
 Config::Config(){
-    //端口号,默认9006
-    PORT = 9006;
-
-    //日志写入方式，默认同步
-    LOGWrite = 0;
+    //端口号,默认9008
+    port = 9008;
 
     //触发组合模式,默认listenfd LT + connfd LT
-    TRIGMode = 0;
+    trigMode = 0;
 
-    //listenfd触发模式，默认LT
-    LISTENTrigmode = 0;
-
-    //connfd触发模式，默认LT
-    CONNTrigmode = 0;
+    //超时时间
+    timeoutMs = 60000;
 
     //优雅关闭链接，默认不使用
-    OPT_LINGER = 0;
+    OptLinger = false;
+
+    //数据库登录名、密码、数据库名
+    sqlUser = (char*)"root";
+    sqlPwd = (char*)"051741";
+    dbName = (char*)"webserverdb";
 
     //数据库连接池数量,默认8
-    sql_num = 8;
+    connPoolNum = 8;
 
     //线程池内的线程数量,默认8
-    thread_num = 8;
+    threadNum = 8;
 
-    //关闭日志,默认不关闭
-    close_log = 0;
+    //日志开关,默认不关闭
+    openLog = true;
 
-    //并发模型,默认是proactor
-    actor_model = 0;
+    //消息队列长度，0为同步日志
+    logQueSize = 1024;
 }
 
-void Config::parse_arg(int argc, char*argv[]){
+void Config::parseArg(int argc, char*argv[]){
     int opt;
-    const char *str = "p:l:m:o:s:t:c:a:";
+    const char *str = "p:m:T:o:u:w:d:s:t:l:L:q:";
     while ((opt = getopt(argc, argv, str)) != -1)
     {
         switch (opt)
         {
         case 'p':
         {
-            PORT = atoi(optarg);
-            break;
-        }
-        case 'l':
-        {
-            LOGWrite = atoi(optarg);
+            port = atoi(optarg);
             break;
         }
         case 'm':
         {
-            TRIGMode = atoi(optarg);
+            trigMode = atoi(optarg);
+            break;
+        }
+        case 'T':
+        {
+            timeoutMs = atoi(optarg);
             break;
         }
         case 'o':
         {
-            OPT_LINGER = atoi(optarg);
+            OptLinger = atoi(optarg);
+            break;
+        }
+        case 'u':
+        {
+            sqlUser = optarg;
+            break;
+        }
+        case 'w':
+        {
+            sqlPwd = optarg;
+            break;
+        }
+        case 'd':
+        {
+            dbName = optarg;
             break;
         }
         case 's':
         {
-            sql_num = atoi(optarg);
+            connPoolNum = atoi(optarg);
             break;
         }
         case 't':
         {
-            thread_num = atoi(optarg);
+            threadNum = atoi(optarg);
             break;
         }
-        case 'c':
+        case 'l':
         {
-            close_log = atoi(optarg);
+            openLog = atoi(optarg);
             break;
         }
-        case 'a':
+        case 'L':
         {
-            actor_model = atoi(optarg);
+            logLevel = atoi(optarg);
+            break;
+        }
+        case 'q':
+        {
+            logQueSize = atoi(optarg);
             break;
         }
         default:
             break;
         }
     }
+}
+
+void Config::print() {
+    printf("port: %d\n", port);
+    printf("trigMode: %d\n", trigMode);
+    printf("timeoutMs: %d\n", timeoutMs);
+    printf("Linger: %d\n", OptLinger);
+    printf("sqlUser: %s\n", sqlUser);
+    printf("sqlPwd: %s\n", sqlPwd);
+    printf("dbName: %s\n", dbName);
+    printf("connPoolNum: %d\n", connPoolNum);
+    printf("threadNum: %d\n", threadNum);
+    printf("openLog: %d\n", openLog);
+    printf("logLevel: %d\n", logLevel);
+    printf("logQueSize: %d\n", logQueSize);
 }
