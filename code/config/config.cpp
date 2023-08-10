@@ -27,6 +27,9 @@ Config::Config(){
     //日志开关,默认不关闭
     openLog = true;
 
+    //日志等级
+    logLevel = 1;
+
     //消息队列长度，0为同步日志
     logQueSize = 1024;
 }
