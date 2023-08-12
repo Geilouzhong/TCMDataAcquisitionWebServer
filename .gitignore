@@ -13,3 +13,5 @@
 *.exe
 /.vscode
 *.md
+*test.cpp
+*test
