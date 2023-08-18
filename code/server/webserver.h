@@ -17,6 +17,7 @@
 #include "../pool/threadpool.h"
 #include "../pool/sqlconnRAII.h"
 #include "../http/httpconn.h"
+#include "../pool/memorypool.h"
 
 class WebServer {
 public:

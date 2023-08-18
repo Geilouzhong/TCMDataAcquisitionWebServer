@@ -16,6 +16,7 @@ WebServer::WebServer(
     HttpConn::userCount = 0;
     HttpConn::srcDir = srcDir_;
     SqlConnPool::Instance()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
+    init_MemoryPool();
 
     InitEventMode_(trigMode);
     if(!InitSocket_()) { isClose_ = true;}

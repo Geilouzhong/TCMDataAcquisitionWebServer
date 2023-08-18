@@ -45,13 +45,8 @@ HttpResponse::HttpResponse() {
     mmFileStat_ = { 0 };
 };
 
-HttpResponse::~HttpResponse() {
-    UnmapFile();
-}
-
 void HttpResponse::Init(const string& srcDir, string& path, bool isKeepAlive, int code){
     assert(srcDir != "");
-    if(mmFile_) { UnmapFile(); }
     code_ = code;
     isKeepAlive_ = isKeepAlive;
     path_ = path;
@@ -116,30 +111,31 @@ void HttpResponse::AddHeader_(Buffer& buff) {
 }
 
 void HttpResponse::AddContent_(Buffer& buff) {
-    int srcFd = open((srcDir_ + path_).data(), O_RDONLY);
-    if(srcFd < 0) { 
-        ErrorContent(buff, "File NotFound!");
-        return; 
-    }
+    getCache();
+    LFUCache& Cache = getCache();
+    string filename = srcDir_ + path_;
+    // 缓存命中
+    if (Cache.get(filename, mmFile_, mmFileStat_)) { }
+    else {
+        int srcFd = open(filename.data(), O_RDONLY);
+        if(srcFd < 0) { 
+            ErrorContent(buff, "File NotFound!");
+            return; 
+        }
 
-    /* 将文件映射到内存提高文件的访问速度 
-        MAP_PRIVATE 建立一个写入时拷贝的私有映射*/
+        /* 将文件映射到内存提高文件的访问速度 
+            MAP_PRIVATE 建立一个写入时拷贝的私有映射*/
+        int* mmRet = (int*)mmap(0, mmFileStat_.st_size, PROT_READ, MAP_PRIVATE, srcFd, 0);
+        if(*mmRet == -1) {
+            ErrorContent(buff, "File NotFound!");
+            return; 
+        }
+        mmFile_ = (char*)mmRet;
+        Cache.set(filename, mmFile_, mmFileStat_);
+        close(srcFd);
+    }
     LOG_DEBUG("file path %s", (srcDir_ + path_).data());
-    int* mmRet = (int*)mmap(0, mmFileStat_.st_size, PROT_READ, MAP_PRIVATE, srcFd, 0);
-    if(*mmRet == -1) {
-        ErrorContent(buff, "File NotFound!");
-        return; 
-    }
-    mmFile_ = (char*)mmRet;
-    close(srcFd);
     buff.Append("Content-length: " + to_string(mmFileStat_.st_size) + "\r\n\r\n");
-}
-
-void HttpResponse::UnmapFile() {
-    if(mmFile_) {
-        munmap(mmFile_, mmFileStat_.st_size);
-        mmFile_ = nullptr;
-    }
 }
 
 string HttpResponse::GetFileType_() {

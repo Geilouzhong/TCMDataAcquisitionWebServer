@@ -9,15 +9,15 @@
 
 #include "../buffer/buffer.h"
 #include "../log/log.h"
+#include "../cache/LFUCache.h"
 
 class HttpResponse {
 public:
     HttpResponse();
-    ~HttpResponse();
+    ~HttpResponse() = default;
 
     void Init(const std::string& srcDir, std::string& path, bool isKeepAlive = false, int code = -1);
     void MakeResponse(Buffer& buff);
-    void UnmapFile();
     char* File();
     size_t FileLen() const;
     void ErrorContent(Buffer& buff, std::string message);

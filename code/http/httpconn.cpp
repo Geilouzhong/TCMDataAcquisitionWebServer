@@ -27,7 +27,6 @@ void HttpConn::init(int fd, const sockaddr_in& addr) {
 }
 
 void HttpConn::Close() {
-    response_.UnmapFile();
     if(isClose_ == false){
         isClose_ = true; 
         userCount--;
