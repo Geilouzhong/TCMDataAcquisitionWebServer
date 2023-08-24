@@ -48,12 +48,6 @@ public:
 
     bool IsKeepAlive() const;
 
-    /* 
-    todo 
-    void HttpConn::ParseFormData() {}
-    void HttpConn::ParseJson() {}
-    */
-
 private:
     bool ParseRequestLine_(const std::string& line);
     void ParseHeader_(const std::string& line);

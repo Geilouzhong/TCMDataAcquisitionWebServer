@@ -2,8 +2,8 @@
 using namespace std;
 
 const unordered_set<string> HttpRequest::DEFAULT_HTML{
-            "/index", "/register", "/login",
-             "/welcome", "/video", "/picture", };
+            "/welcome", "/register", "/login",
+             "/music", "/video", "/picture", };
 
 const unordered_map<string, int> HttpRequest::DEFAULT_HTML_TAG {
             {"/register.html", 0}, {"/login.html", 1},  };
@@ -59,7 +59,7 @@ bool HttpRequest::parse(Buffer& buff) {
 
 void HttpRequest::ParsePath_() {
     if(path_ == "/") {
-        path_ = "/index.html"; 
+        path_ = "/login.html"; 
     }
     else {
         for(auto &item: DEFAULT_HTML) {
