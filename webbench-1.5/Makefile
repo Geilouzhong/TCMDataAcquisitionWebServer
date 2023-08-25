@@ -1,5 +1,5 @@
-CFLAGS?=	-Wall -ggdb -W -O
-CC?=		gcc -no-pie
+CFLAGS?=	-Wall -Wno-unused-parameter -ggdb -W -O
+CC?=		gcc
 LIBS?=
 LDFLAGS?=
 PREFIX?=	/usr/local

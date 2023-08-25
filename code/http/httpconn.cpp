@@ -51,6 +51,10 @@ int HttpConn::GetPort() const {
     return addr_.sin_port;
 }
 
+bool HttpConn::IsClose() const {
+    return isClose_;
+}
+
 ssize_t HttpConn::read(int* saveErrno) {
     ssize_t len = -1;
     do {

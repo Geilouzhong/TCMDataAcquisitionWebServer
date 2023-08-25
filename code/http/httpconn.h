@@ -27,6 +27,8 @@ public:
 
     void Close();
 
+    bool IsClose() const;
+
     int GetFd() const;
 
     int GetPort() const;

@@ -19,6 +19,8 @@
 #include "../http/httpconn.h"
 #include "../pool/memorypool.h"
 
+const int MAX_FD = 65536;
+
 class WebServer {
 public:
     WebServer(
@@ -64,7 +66,7 @@ private:
     std::unique_ptr<HeapTimer> timer_;
     std::unique_ptr<ThreadPool> threadpool_;
     std::unique_ptr<Epoller> epoller_;
-    std::unordered_map<int, HttpConn> users_;
+    HttpConn* users_;
 };
 
 

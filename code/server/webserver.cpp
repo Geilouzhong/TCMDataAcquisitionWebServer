@@ -15,6 +15,7 @@ WebServer::WebServer(
     strncat(srcDir_, "/root/", 16);
     HttpConn::userCount = 0;
     HttpConn::srcDir = srcDir_;
+    users_ = new HttpConn[MAX_FD];
     SqlConnPool::Instance()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
     init_MemoryPool();
 
@@ -39,6 +40,7 @@ WebServer::WebServer(
 
 WebServer::~WebServer() {
     close(listenFd_);
+    delete[] users_;
     isClose_ = true;
     free(srcDir_);
     SqlConnPool::Instance()->ClosePool();
@@ -85,15 +87,15 @@ void WebServer::Start() {
                 DealListen_();
             }
             else if(events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
-                assert(users_.count(fd) > 0);
+                assert(!users_[fd].IsClose());
                 CloseConn_(&users_[fd]);
             }
             else if(events & EPOLLIN) {
-                assert(users_.count(fd) > 0);
+                assert(!users_[fd].IsClose());
                 DealRead_(&users_[fd]);
             }
             else if(events & EPOLLOUT) {
-                assert(users_.count(fd) > 0);
+                assert(!users_[fd].IsClose());
                 DealWrite_(&users_[fd]);
             } else {
                 LOG_ERROR("Unexpected event");
@@ -113,7 +115,6 @@ void WebServer::SendError_(int fd, const char*info) {
 
 void WebServer::CloseConn_(HttpConn* client) {
     assert(client);
-    LOG_INFO("Client[%d] quit!", client->GetFd());
     epoller_->DelFd(client->GetFd());
     client->Close();
 }
@@ -126,7 +127,6 @@ void WebServer::AddClient_(int fd, sockaddr_in addr) {
     }
     epoller_->AddFd(fd, EPOLLIN | connEvent_);
     SetFdNonblock(fd);
-    LOG_INFO("Client[%d] in!", users_[fd].GetFd());
 }
 
 void WebServer::DealListen_() {
