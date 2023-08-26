@@ -3,7 +3,6 @@
 !*/
 !*.cpp
 !*.h
-!LICENSE
 !makefile
 !Makefile
 
@@ -12,6 +11,7 @@
 *.log
 *.exe
 /.vscode
+.gitignore
 *.md
 *test.cpp
 *test
