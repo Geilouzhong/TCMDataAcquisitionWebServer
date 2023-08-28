@@ -12,6 +12,6 @@
 *.exe
 /.vscode
 .gitignore
-*.md
+# *.md
 *test.cpp
 *test
