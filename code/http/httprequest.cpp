@@ -1,18 +1,39 @@
 #include "httprequest.h"
 using namespace std;
 
+const string HttpRequest::s_staticPrefix("/static/");
 const unordered_set<string> HttpRequest::DEFAULT_HTML{
-            "/welcome", "/register", "/login",
-             "/music", "/video", "/picture", };
+            "/static/welcome", "/static/register", "/static/login",
+             "/static/music", "/static/video", "/static/picture", };
 
 const unordered_map<string, int> HttpRequest::DEFAULT_HTML_TAG {
-            {"/register.html", 0}, {"/login.html", 1},  };
+            {"/register.html", 0}, {"/login", 1},  };
+
+std::string HttpRequest::s_URLDecode(const std::string& url) {
+    std::string result;
+    char ch;
+    int i, j;
+    for (i = 0; i < url.length(); i++) {
+        if (int(url[i]) == 37) { // ASCII code for '%'
+            sscanf(url.substr(i + 1, 2).c_str(), "%x", &j);
+            ch = static_cast<char>(j);
+            result += ch;
+            i += 2;
+        }
+        else {
+            result += url[i];
+        }
+    }
+    return result;
+}
 
 void HttpRequest::Init() {
-    method_ = path_ = version_ = body_ = "";
+    method_ = path_ = version_ = body_ = queryTable_ = action_ = "";
     state_ = REQUEST_LINE;
+    isAccessStatic_ = true;
     header_.clear();
     post_.clear();
+    queryCond_.clear();
 }
 
 bool HttpRequest::IsKeepAlive() const {
@@ -20,6 +41,10 @@ bool HttpRequest::IsKeepAlive() const {
         return header_.find("Connection")->second == "keep-alive" && version_ == "1.1";
     }
     return false;
+}
+
+bool HttpRequest::IsAccessStatic() const {
+    return isAccessStatic_;
 }
 
 bool HttpRequest::parse(Buffer& buff) {
@@ -58,16 +83,61 @@ bool HttpRequest::parse(Buffer& buff) {
 }
 
 void HttpRequest::ParsePath_() {
+    path_ = s_URLDecode(path_);
     if(path_ == "/") {
-        path_ = "/login.html"; 
+        path_ = "/static/login.html"; 
+        return ;
     }
-    else {
+    /* 静态资源 */
+    if (path_.substr(0, s_staticPrefix.length()) == s_staticPrefix || path_ == "/login") {
         for(auto &item: DEFAULT_HTML) {
             if(item == path_) {
                 path_ += ".html";
                 break;
             }
         }
+        isAccessStatic_ = true;
+    }
+    /* 数据库访问 */
+    else {
+        ParseUrlQuery_();
+    }
+}
+
+void HttpRequest::ParseUrlQuery_() {
+    /* 获取访问的表 */
+    size_t found = path_.find_last_of('/');
+    if (found != std::string::npos && found > 0) {
+        queryTable_ = path_.substr(1, found - 1);
+        isAccessStatic_ = false;
+    }
+
+    /* 获取行为 */
+    regex pattern("/([^?]+)");
+    smatch match;
+    if (regex_search(path_, match, pattern)) {
+        string tmp = match[1];
+        found = tmp.find_last_of('/');
+        if (found != std::string::npos && found > 0) {
+            action_ = tmp.substr(found + 1);
+        }
+    } else {
+
+    }
+
+    /* 获取过滤内容 */
+    pattern = ("([\\w-]+)=([\\w-]+)");
+    sregex_iterator next(path_.begin(), path_.end(), pattern);
+    sregex_iterator end;
+    while (next != end) {
+        smatch match = *next;
+        queryCond_[match.str(1)] = match.str(2);
+        ++next;
+    }
+    LOG_DEBUG("Table: %s", queryTable_.c_str())
+    LOG_DEBUG("Action: %s", action_.c_str())
+    for (auto it = queryCond_.begin(); it != queryCond_.end(); it++) {
+        LOG_DEBUG("%s: %s", it->first.c_str(), it->second.c_str())
     }
 }
 
@@ -118,7 +188,7 @@ void HttpRequest::ParsePost_() {
             if(tag == 0 || tag == 1) {
                 bool isLogin = (tag == 1);
                 if(UserVerify(post_["username"], post_["password"], isLogin)) {
-                    path_ = "/welcome.html";
+                    path_ = "/static/home.html";
                 } 
                 else {
                     path_ = "/error.html";
@@ -184,7 +254,7 @@ bool HttpRequest::UserVerify(const string &name, const string &pwd, bool isLogin
     
     if(!isLogin) { flag = true; }
     /* 查询用户及密码 */
-    snprintf(order, 256, "SELECT username, password FROM user WHERE username='%s' LIMIT 1", name.c_str());
+    snprintf(order, 256, "SELECT username, password FROM doctors WHERE username='%s' LIMIT 1", name.c_str());
     LOG_DEBUG("%s", order);
 
     if(mysql_query(sql, order)) { 
@@ -259,4 +329,14 @@ std::string HttpRequest::GetPost(const char* key) const {
         return post_.find(key)->second;
     }
     return "";
+}
+
+std::string& HttpRequest::GetQueryTable() {
+    return queryTable_;
+}
+std::string& HttpRequest::GetAction() {
+    return action_;
+}
+std::unordered_map<std::string, std::string>& HttpRequest::GetQueryCond() {
+    return queryCond_;
 }

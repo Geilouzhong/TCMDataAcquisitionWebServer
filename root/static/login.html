@@ -1,0 +1,116 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+     <head>
+          <meta charset="UTF-8">
+          <title>中医数据采集-管理端</title>
+      </head>
+      <body>
+  <br/>
+  <br/>
+      <div align="center"><font size="5"> <strong>登录</strong></font></div>
+      <br/>
+          <div>
+                  <form action="login" method="post">
+                          <div align="center"><input type="text" name="username" placeholder="用户名" required="required"></div><br/>
+                          <div align="center"><input type="password" name="password" placeholder="密码" required="required"></div><br/>
+                          <div align="center"><button type="submit">确定</button></div>
+                  </form>
+                  <br/>
+                  <form action="register" method="post">
+                    <div align="center"><button type="submit">新用户注册</button></div>
+                  </form>
+          </div>
+          
+      </body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中医数据采集-管理端</title>
+    <style>
+        body {
+            background-color: #f7f3e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 400px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 94%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- <img class="logo" src="your-logo.png" alt="Logo"> -->
+        <h1>中医数据采集管理平台</h1>
+        <form action="login" method="post">
+            <div><input type="text" id="usernameInput" name="username" placeholder="请输入用户名", required="required"></div>
+            <div><input type="password" id="passwordInput" name="password" placeholder="请输入密码", required="required"></div>
+            <div><button type="submit">登录</button></div>
+        </form>
+    </div>
+</body>
+
+<script>
+    function login() {
+        var username = document.getElementById('usernameInput').value;
+        var password = document.getElementById('passwordInput').value;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'login');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // 登录成功
+                console.log(xhr.responseText);
+            } else {
+                // 登录失败
+                console.error('登录失败');
+            }
+        };
+
+        var data = "username=" + username + "&password=" + password;
+        xhr.send(data);
+    }
+</script>
+
+</html>

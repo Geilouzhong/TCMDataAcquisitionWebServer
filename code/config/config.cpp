@@ -16,7 +16,7 @@ Config::Config(){
     //数据库登录名、密码、数据库名
     sqlUser = (char*)"root";
     sqlPwd = (char*)"051741";
-    dbName = (char*)"webserverdb";
+    dbName = (char*)"TCMdb";
 
     //数据库连接池数量,默认8
     connPoolNum = 8;

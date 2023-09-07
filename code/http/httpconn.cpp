@@ -69,6 +69,7 @@ ssize_t HttpConn::read(int* saveErrno) {
 ssize_t HttpConn::write(int* saveErrno) {
     ssize_t len = -1;
     do {
+        // writev(STDOUT_FILENO, iov_, iovCnt_);
         len = writev(fd_, iov_, iovCnt_);
         if(len <= 0) {
             *saveErrno = errno;
@@ -104,7 +105,14 @@ bool HttpConn::process() {
         response_.Init(srcDir, request_.path(), false, 400);
     }
 
-    response_.MakeResponse(writeBuff_);
+    if (request_.IsAccessStatic()) {
+        response_.MakeResponse(writeBuff_);
+    }
+    else {
+        response_.isAccessStatic = false;
+        response_.SQLResponse(writeBuff_, request_.GetQueryTable(), request_.GetAction(), request_.GetQueryCond());
+    }
+    
     /* 响应头 */
     iov_[0].iov_base = const_cast<char*>(writeBuff_.Peek());
     iov_[0].iov_len = writeBuff_.ReadableBytes();

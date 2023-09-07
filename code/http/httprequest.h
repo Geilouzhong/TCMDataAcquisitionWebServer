@@ -45,9 +45,12 @@ public:
     std::string version() const;
     std::string GetPost(const std::string& key) const;
     std::string GetPost(const char* key) const;
+    std::string& GetQueryTable();
+    std::string& GetAction();
+    std::unordered_map<std::string, std::string>& GetQueryCond();
 
     bool IsKeepAlive() const;
-
+    bool IsAccessStatic() const;
 private:
     bool ParseRequestLine_(const std::string& line);
     void ParseHeader_(const std::string& line);
@@ -56,14 +59,19 @@ private:
     void ParsePath_();
     void ParsePost_();
     void ParseFromUrlencoded_();
+    void ParseUrlQuery_();
 
     static bool UserVerify(const std::string& name, const std::string& pwd, bool isLogin);
 
     PARSE_STATE state_;
-    std::string method_, path_, version_, body_;
+    bool isAccessStatic_; 
+    std::string method_, path_, version_, body_, queryTable_, action_;
     std::unordered_map<std::string, std::string> header_;
     std::unordered_map<std::string, std::string> post_;
+    std::unordered_map<std::string, std::string> queryCond_;
 
+    static std::string s_URLDecode(const std::string& url);
+    static const std::string s_staticPrefix;
     static const std::unordered_set<std::string> DEFAULT_HTML;
     static const std::unordered_map<std::string, int> DEFAULT_HTML_TAG;
     static int ConverHex(char ch);

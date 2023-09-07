@@ -15,3 +15,5 @@
 # *.md
 *test.cpp
 *test
+*test.sh
+*.txt

@@ -49,6 +49,7 @@ void HttpResponse::Init(const string& srcDir, string& path, bool isKeepAlive, in
     assert(srcDir != "");
     code_ = code;
     isKeepAlive_ = isKeepAlive;
+    isAccessStatic = true;
     path_ = path;
     srcDir_ = srcDir;
     mmFile_ = nullptr; 
@@ -72,12 +73,27 @@ void HttpResponse::MakeResponse(Buffer& buff) {
     AddContent_(buff);
 }
 
+void HttpResponse::SQLResponse(Buffer& buff, string& queryTable, string& action, unordered_map<string, string>& queryCond) {
+    sqlAction::getQueryResult(queryResult_, queryTable, action, queryCond);
+    LOG_DEBUG("Query result: %s", queryResult_.c_str())
+    code_ = 200;
+    AddStateLine_(buff);
+    AddHeader_(buff);
+    buff.Append("Content-length: " + to_string(queryResult_.size()) + "\r\n\r\n");
+}
+
 char* HttpResponse::File() {
-    return mmFile_;
+    if (isAccessStatic) {
+        return mmFile_;
+    }
+    return &queryResult_[0];
 }
 
 size_t HttpResponse::FileLen() const {
-    return mmFileStat_.st_size;
+    if (isAccessStatic) {
+        return mmFileStat_.st_size;
+    }
+    return queryResult_.size();
 }
 
 void HttpResponse::ErrorHtml_() {
@@ -108,6 +124,7 @@ void HttpResponse::AddHeader_(Buffer& buff) {
         buff.Append("close\r\n");
     }
     buff.Append("Content-type: " + GetFileType_() + "\r\n");
+    buff.Append("Access-Control-Allow-Origin: *\r\n");
 }
 
 void HttpResponse::AddContent_(Buffer& buff) {
@@ -139,6 +156,9 @@ void HttpResponse::AddContent_(Buffer& buff) {
 }
 
 string HttpResponse::GetFileType_() {
+    if (!isAccessStatic) {
+        return "application/json";
+    }
     /* 判断文件类型 */
     string::size_type idx = path_.find_last_of('.');
     if(idx == string::npos) {
