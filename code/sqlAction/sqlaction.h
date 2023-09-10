@@ -18,6 +18,8 @@ namespace sqlAction{
 
     std::string getTodayUserListOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
 
+    std::string getDoctorNameOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
+
     std::string addRecordOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
 
     std::string updateRecordOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);

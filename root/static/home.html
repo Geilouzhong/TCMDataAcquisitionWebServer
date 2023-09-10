@@ -12,6 +12,7 @@
         #header {
             text-align: right;
             padding: 10px;
+            display: inline-block;
         }
 
         #content {
@@ -162,7 +163,7 @@
 <body>
     <noscript><strong>We're sorry but 中医数据采集-管理端 doesn't work properly without JavaScript enabled. Please enable it
             to continue.</strong></noscript>
-    <div id="header" , class="inline-container">
+    <div id="header">
         <span id="welcome"></span>
         <button class="icon-button" onclick="changePassword()">
             <width="20" height="20"> 修改密码
@@ -410,7 +411,11 @@
                         }
                         resolve(true);
 
-                    } else {
+                    }
+                    else if (xhr.status === 401) {
+                        logout();
+                    } 
+                    else {
                         console.error('请求失败', xhr.statusText);
                         if (action != null) {
 

@@ -24,6 +24,7 @@ const unordered_map<string, function<string(string&, unordered_map<string, strin
     {"getRecord", sqlAction::getRecordOrder},
     {"getRecordList", sqlAction::getRecordListOrder},
     {"getTodayUserList", sqlAction::getTodayUserListOrder},
+    {"getDoctorName", sqlAction::getDoctorNameOrder},
     {"addRecord", sqlAction::addRecordOrder},
     {"updateRecord", sqlAction::updateRecordOrder},
     {"updateDoctorPassword", sqlAction::updateDoctorPasswordOrder}
@@ -92,6 +93,10 @@ string sqlAction::getTodayUserListOrder(string& table, unordered_map<string, str
         "AS json_array_result FROM diagnostic_records INNER JOIN users ON users.id = patient_id WHERE DATE(reception_time)=CURDATE() AND ";
     return getList(table, queryCond, order.c_str());
     
+}
+
+string sqlAction::getDoctorNameOrder(string& table, unordered_map<string, string>& queryCond) {
+    return "SELECT JSON_OBJECT('医生姓名', name) AS json_array_result FROM doctors WHERE id=" + queryCond.find("doctorIdInRecord")->second; // 待优化
 }
 
 string sqlAction::addRecordOrder(string& table, unordered_map<string, string>& queryCond) {
