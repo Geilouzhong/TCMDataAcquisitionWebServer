@@ -100,7 +100,8 @@ bool HttpConn::process() {
     }
     else if(request_.parse(readBuff_)) {
         LOG_DEBUG("%s", request_.path().c_str());
-        response_.Init(srcDir, request_.path(), request_.IsKeepAlive(), 200);
+        string sessionId = request_.GetSessionId();
+        response_.Init(srcDir, request_.path(), request_.IsKeepAlive(), 200, sessionId);
     } else {
         response_.Init(srcDir, request_.path(), false, 400);
     }
@@ -110,7 +111,7 @@ bool HttpConn::process() {
     }
     else {
         response_.isAccessStatic = false;
-        response_.SQLResponse(writeBuff_, request_.GetQueryTable(), request_.GetAction(), request_.GetQueryCond());
+        response_.SQLResponse(writeBuff_, request_.GetQueryTable(), request_.GetAction(), request_.GetQueryCond(), request_.GetCookies());
     }
     
     /* 响应头 */

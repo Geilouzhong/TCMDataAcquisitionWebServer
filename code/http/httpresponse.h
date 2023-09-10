@@ -11,15 +11,17 @@
 #include "../log/log.h"
 #include "../cache/LFUCache.h"
 #include "../sqlAction/sqlaction.h"
+#include "../stateManager/session.h"
 
 class HttpResponse {
 public:
     HttpResponse();
     ~HttpResponse() = default;
 
-    void Init(const std::string& srcDir, std::string& path, bool isKeepAlive = false, int code = -1);
+    void Init(const std::string& srcDir, std::string& path, bool isKeepAlive = false, int code = -1, std::string sessionId = "");
     void MakeResponse(Buffer& buff);
-    void SQLResponse(Buffer& buff, std::string& queryTable, std::string& action, std::unordered_map<std::string, std::string>& queryCond);
+    void SQLResponse(Buffer& buff, std::string& queryTable, std::string& action,
+         std::unordered_map<std::string, std::string>& queryCond, std::unordered_map<std::string, std::string>& cookies);
     char* File();
     size_t FileLen() const;
     void ErrorContent(Buffer& buff, std::string message);
@@ -44,6 +46,7 @@ private:
     char* mmFile_; 
     struct stat mmFileStat_;
     string queryResult_;
+    string sessionId_;
 
     static const std::unordered_map<std::string, std::string> SUFFIX_TYPE;
     static const std::unordered_map<int, std::string> CODE_STATUS;

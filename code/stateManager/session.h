@@ -33,10 +33,12 @@ public:
     std::string addSession(std::string userId);
     void updateSession(std::string sessionId);
     std::string getUserID(std::string sessionId);
+    void delSession(std::string sessionId);
     void closeSessionPool(); 
+    void print();
 
-private:
     std::unordered_map<std::string, Session*> pool_;
+private:
     std::mutex mtx_;
 
     SessionPool() = default;

@@ -27,6 +27,7 @@ const unordered_map<string, string> HttpResponse::SUFFIX_TYPE = {
 const unordered_map<int, string> HttpResponse::CODE_STATUS = {
     { 200, "OK" },
     { 400, "Bad Request" },
+    { 401, "Unauthorized"},
     { 403, "Forbidden" },
     { 404, "Not Found" },
 };
@@ -45,7 +46,7 @@ HttpResponse::HttpResponse() {
     mmFileStat_ = { 0 };
 };
 
-void HttpResponse::Init(const string& srcDir, string& path, bool isKeepAlive, int code){
+void HttpResponse::Init(const string& srcDir, string& path, bool isKeepAlive, int code, string sessionId){
     assert(srcDir != "");
     code_ = code;
     isKeepAlive_ = isKeepAlive;
@@ -54,6 +55,8 @@ void HttpResponse::Init(const string& srcDir, string& path, bool isKeepAlive, in
     srcDir_ = srcDir;
     mmFile_ = nullptr; 
     mmFileStat_ = { 0 };
+    queryResult_ = "";
+    sessionId_ = sessionId;
 }
 
 void HttpResponse::MakeResponse(Buffer& buff) {
@@ -73,10 +76,51 @@ void HttpResponse::MakeResponse(Buffer& buff) {
     AddContent_(buff);
 }
 
-void HttpResponse::SQLResponse(Buffer& buff, string& queryTable, string& action, unordered_map<string, string>& queryCond) {
-    sqlAction::getQueryResult(queryResult_, queryTable, action, queryCond);
-    LOG_DEBUG("Query result: %s", queryResult_.c_str())
-    code_ = 200;
+void HttpResponse::SQLResponse(Buffer& buff, string& queryTable, string& action, 
+        unordered_map<string, string>& queryCond, unordered_map<string, string>& cookies) {
+    
+    if (cookies.count("sessionId") < 1) {
+        code_ = 401;
+        LOG_DEBUG("User not log in!")
+    }
+    else {
+        SessionPool* sessionPool = SessionPool::Instance();
+        LOG_DEBUG("Verify Session Id: %s", cookies["sessionId"].c_str())
+        if (sessionPool->sessionVerify(cookies["sessionId"])) {
+            sessionPool->updateSession(cookies["sessionId"]);
+
+            string doctorUsername = sessionPool->getUserID(cookies["sessionId"]);
+            string doctorId = sqlAction::getDoctorIdByUsername(doctorUsername);
+            LOG_DEBUG("doctor ID: %s", doctorId.c_str());
+
+            queryCond.insert({"doctorIdInRecord", doctorId});
+            if (action.substr(0, 3) == "get") {
+                sqlAction::getQueryResult(queryResult_, queryTable, action, queryCond);
+                LOG_DEBUG("Query result: %s", queryResult_.c_str())
+                code_ = 200;
+            }
+            else if (action.substr(0, 3) == "add"){
+                if (sqlAction::insertRecord(queryResult_, queryTable, action, queryCond)) {
+                    code_ = 200;
+                }
+                else {
+                    code_ = 400;
+                }
+            }
+            else if (action.substr(0, 6) == "update") {
+                if (sqlAction::updateRecord(queryResult_, queryTable, action, queryCond)) {
+                    code_ = 200;
+                }
+                else {
+                    code_ = 400;
+                }
+            }
+        }
+        else {
+            code_ = 401;
+            LOG_DEBUG("User authentication failure!")
+        }
+    }
     AddStateLine_(buff);
     AddHeader_(buff);
     buff.Append("Content-length: " + to_string(queryResult_.size()) + "\r\n\r\n");
@@ -124,7 +168,10 @@ void HttpResponse::AddHeader_(Buffer& buff) {
         buff.Append("close\r\n");
     }
     buff.Append("Content-type: " + GetFileType_() + "\r\n");
-    buff.Append("Access-Control-Allow-Origin: *\r\n");
+    if (sessionId_ != "") {
+        buff.Append("Set-Cookie: sessionId=" + sessionId_ + "; SameSite=Lax\r\n");
+    }
+    // buff.Append("Access-Control-Allow-Origin: *\r\n");
 }
 
 void HttpResponse::AddContent_(Buffer& buff) {

@@ -12,6 +12,7 @@
 #include "../log/log.h"
 #include "../pool/sqlconnpool.h"
 #include "../pool/sqlconnRAII.h"
+#include "../stateManager/session.h"
 
 class HttpRequest {
 public:
@@ -47,6 +48,8 @@ public:
     std::string GetPost(const char* key) const;
     std::string& GetQueryTable();
     std::string& GetAction();
+    std::string GetSessionId() const;
+    std::unordered_map<std::string, std::string>& GetCookies();
     std::unordered_map<std::string, std::string>& GetQueryCond();
 
     bool IsKeepAlive() const;
@@ -60,15 +63,20 @@ private:
     void ParsePost_();
     void ParseFromUrlencoded_();
     void ParseUrlQuery_();
+    void ParseCookie_();
 
     static bool UserVerify(const std::string& name, const std::string& pwd, bool isLogin);
 
     PARSE_STATE state_;
     bool isAccessStatic_; 
+    bool isDelSession_;
+    std::string sessionId_;
+
     std::string method_, path_, version_, body_, queryTable_, action_;
     std::unordered_map<std::string, std::string> header_;
     std::unordered_map<std::string, std::string> post_;
     std::unordered_map<std::string, std::string> queryCond_;
+    std::unordered_map<std::string, std::string> cookies_;
 
     static std::string s_URLDecode(const std::string& url);
     static const std::string s_staticPrefix;

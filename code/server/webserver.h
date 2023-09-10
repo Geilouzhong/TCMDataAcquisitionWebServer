@@ -18,6 +18,7 @@
 #include "../pool/sqlconnRAII.h"
 #include "../http/httpconn.h"
 #include "../pool/memorypool.h"
+#include "../stateManager/session.h"
 
 const int MAX_FD = 65536;
 

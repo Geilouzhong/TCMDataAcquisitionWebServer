@@ -17,6 +17,7 @@ WebServer::WebServer(
     HttpConn::srcDir = srcDir_;
     users_ = new HttpConn[MAX_FD];
     SqlConnPool::Instance()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
+    SessionPool::Instance();
     init_MemoryPool();
 
     InitEventMode_(trigMode);

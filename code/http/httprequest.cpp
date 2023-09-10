@@ -28,12 +28,14 @@ std::string HttpRequest::s_URLDecode(const std::string& url) {
 }
 
 void HttpRequest::Init() {
-    method_ = path_ = version_ = body_ = queryTable_ = action_ = "";
+    method_ = path_ = version_ = body_ = queryTable_ = action_ = sessionId_ = "";
     state_ = REQUEST_LINE;
     isAccessStatic_ = true;
+    isDelSession_ = false;
     header_.clear();
     post_.clear();
     queryCond_.clear();
+    cookies_.clear();
 }
 
 bool HttpRequest::IsKeepAlive() const {
@@ -45,6 +47,10 @@ bool HttpRequest::IsKeepAlive() const {
 
 bool HttpRequest::IsAccessStatic() const {
     return isAccessStatic_;
+}
+
+string HttpRequest::GetSessionId() const {
+    return sessionId_;
 }
 
 bool HttpRequest::parse(Buffer& buff) {
@@ -78,7 +84,15 @@ bool HttpRequest::parse(Buffer& buff) {
         if(lineEnd == buff.BeginWrite()) { break; }
         buff.RetrieveUntil(lineEnd + 2);
     }
+    // 退出登录清除session
+    if (isDelSession_ && isAccessStatic_) {
+        SessionPool::Instance()->delSession(cookies_.find("sessionId")->second);
+        isDelSession_ = false;
+    }
     LOG_DEBUG("[%s], [%s], [%s]", method_.c_str(), path_.c_str(), version_.c_str());
+    // for (auto it = header_.begin(); it != header_.end(); ++it) {
+    //     LOG_DEBUG("%s: %s", it->first.c_str(), it->second.c_str())
+    // }
     return true;
 }
 
@@ -97,6 +111,10 @@ void HttpRequest::ParsePath_() {
             }
         }
         isAccessStatic_ = true;
+    }
+    else if (path_.substr(path_.length() - 7) == "/logout") {
+        isDelSession_ = true;
+        path_ = "/static/login.html";
     }
     /* 数据库访问 */
     else {
@@ -136,9 +154,9 @@ void HttpRequest::ParseUrlQuery_() {
     }
     LOG_DEBUG("Table: %s", queryTable_.c_str())
     LOG_DEBUG("Action: %s", action_.c_str())
-    for (auto it = queryCond_.begin(); it != queryCond_.end(); it++) {
-        LOG_DEBUG("%s: %s", it->first.c_str(), it->second.c_str())
-    }
+    // for (auto it = queryCond_.begin(); it != queryCond_.end(); it++) {
+    //     LOG_DEBUG("%s: %s", it->first.c_str(), it->second.c_str())
+    // }
 }
 
 bool HttpRequest::ParseRequestLine_(const string& line) {
@@ -151,7 +169,7 @@ bool HttpRequest::ParseRequestLine_(const string& line) {
         state_ = HEADERS;
         return true;
     }
-    LOG_ERROR("RequestLine Error");
+    LOG_ERROR("RequestLine Error: %s", line.c_str());
     return false;
 }
 
@@ -160,9 +178,35 @@ void HttpRequest::ParseHeader_(const string& line) {
     smatch subMatch;
     if(regex_match(line, subMatch, patten)) {
         header_[subMatch[1]] = subMatch[2];
+        if (subMatch[1] == "Cookie") {
+            // LOG_DEBUG("Cookie: %s", header_["Cookie"].c_str())
+            ParseCookie_();
+        }
     }
     else {
         state_ = BODY;
+    }
+}
+
+void HttpRequest::ParseCookie_() {
+    if (header_.find("Cookie") == header_.end()) return;
+    string cookieString = header_["Cookie"];
+    
+    // 匹配 "name=value" 形式的 Cookie
+    std::regex pattern(R"(([^=\s]+)=([^;\s]+))");
+
+    std::sregex_iterator iter(cookieString.begin(), cookieString.end(), pattern);
+    std::sregex_iterator end;
+    
+    while (iter != end) {
+        std::smatch match = *iter;
+        
+        std::string name = match.str(1);
+        std::string value = match.str(2);
+        
+        cookies_[name] = value;
+        
+        ++iter;
     }
 }
 
@@ -188,11 +232,33 @@ void HttpRequest::ParsePost_() {
             if(tag == 0 || tag == 1) {
                 bool isLogin = (tag == 1);
                 if(UserVerify(post_["username"], post_["password"], isLogin)) {
+
+                    SessionPool* sessionPool = SessionPool::Instance();
+                    // 验证session有效性，有效则更新session，无效则重新生成
+                    if (cookies_.count("sessionId") == 1) {
+                        if (sessionPool->sessionVerify(cookies_["sessionId"])) {
+                            sessionPool->updateSession(cookies_["sessionId"]);
+                        }
+                        else {
+                            sessionId_ = sessionPool->addSession(post_["username"]);
+                            LOG_DEBUG("Generate session, ID: %s, username: %s", sessionId_.c_str(), post_["username"].c_str())
+                        }
+                    }
+                    else {
+                        sessionId_ = sessionPool->addSession(post_["username"]);
+                        LOG_DEBUG("Generate session, ID: %s, username: %s", sessionId_.c_str(), post_["username"].c_str())
+                    }
+
                     path_ = "/static/home.html";
                 } 
                 else {
                     path_ = "/error.html";
                 }
+            }
+        }
+        else {
+            for (const auto& pair : post_) {
+                queryCond_.insert({pair.first, pair.second});
             }
         }
     }   
@@ -339,4 +405,8 @@ std::string& HttpRequest::GetAction() {
 }
 std::unordered_map<std::string, std::string>& HttpRequest::GetQueryCond() {
     return queryCond_;
+}
+
+std::unordered_map<std::string, std::string>& HttpRequest::GetCookies() {
+    return cookies_;
 }

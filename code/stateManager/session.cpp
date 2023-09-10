@@ -39,7 +39,7 @@ void Session::update() {
 }
 
 bool Session::verify() {
-    return chrono::system_clock::now() > expireTime_;
+    return chrono::system_clock::now() < expireTime_;
 }
 
 void SessionPool::closeSessionPool() {
@@ -86,6 +86,22 @@ string SessionPool::getUserID(string sessionId) {
         return it->second->getUserID();
     }
     return "";
+}
+
+void SessionPool::delSession(string sessionId) {
+    lock_guard<mutex> lock(mtx_);
+    auto it = pool_.find(sessionId);
+    if (it != pool_.end()) {
+        Session* tmp = it->second;
+        pool_.erase(it);
+        delete tmp;
+    }
+}
+
+void SessionPool::print() {
+    for (auto it = pool_.begin(); it != pool_.end(); ++it) {
+        printf("%s\n", it->first.c_str());
+    }
 }
 
 SessionPool* SessionPool::Instance() {
