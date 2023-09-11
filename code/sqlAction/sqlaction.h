@@ -20,6 +20,10 @@ namespace sqlAction{
 
     std::string getDoctorNameOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
 
+    std::string getQueryNumOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
+
+    std::string getTodayQueryNumOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
+
     std::string addRecordOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);
 
     std::string updateRecordOrder(std::string& table, std::unordered_map<std::string, std::string>& queryCond);

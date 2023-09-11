@@ -5,49 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>中医数据采集-管理端</title>
-    <style>
-        body {
-            background-color: #f7f3e9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            width: 400px;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-
-        .logo {
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 94%;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4caf50;
-            color: #ffffff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="icon" href="static/favicon.ico">
+    <link rel="stylesheet" href="static/css/login.css">
 </head>
 
 <body>
@@ -64,32 +23,7 @@
     </div>
 </body>
 
-<script>
-    function login() {
-        var username = document.getElementById('usernameInput').value;
-        var password = document.getElementById('passwordInput').value;
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'login');
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                var response = xhr.responseText;
-                document.open();
-                document.write(response);
-                document.close();
-            } else {
-                var errorMessage = document.getElementById("error-message");
-                errorMessage.style.display = "block";
-                errorMessage.textContent = "用户名不存在或密码错误";
-                return false;
-            }
-            return true;
-        };
-
-        var data = "username=" + username + "&password=" + password;
-        xhr.send(data);
-    }
+<script src="static/js/login.js">
 </script>
 
 </html>

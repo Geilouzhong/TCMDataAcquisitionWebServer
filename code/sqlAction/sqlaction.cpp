@@ -25,6 +25,8 @@ const unordered_map<string, function<string(string&, unordered_map<string, strin
     {"getRecordList", sqlAction::getRecordListOrder},
     {"getTodayUserList", sqlAction::getTodayUserListOrder},
     {"getDoctorName", sqlAction::getDoctorNameOrder},
+    {"getQueryNum", sqlAction::getQueryNumOrder},
+    {"getTodayQueryNum", sqlAction::getTodayQueryNumOrder},
     {"addRecord", sqlAction::addRecordOrder},
     {"updateRecord", sqlAction::updateRecordOrder},
     {"updateDoctorPassword", sqlAction::updateDoctorPasswordOrder}
@@ -44,13 +46,13 @@ string getList(string& table, unordered_map<string, string>& queryCond, const ch
         queryCond.erase("pageSize");
     }
     
-    int pageIndex = 0;
+    int pageIndex = 1;
     if (queryCond.count("pageIndex") > 0) {
         pageIndex = stoi(queryCond["pageIndex"]);
         queryCond.erase("pageIndex");
     }
 
-    string offset = to_string(pageSize * pageIndex);
+    string offset = to_string(pageSize * (pageIndex - 1));
 
     stringstream orderStream;
     orderStream << str;
@@ -97,6 +99,16 @@ string sqlAction::getTodayUserListOrder(string& table, unordered_map<string, str
 
 string sqlAction::getDoctorNameOrder(string& table, unordered_map<string, string>& queryCond) {
     return "SELECT JSON_OBJECT('医生姓名', name) AS json_array_result FROM doctors WHERE id=" + queryCond.find("doctorIdInRecord")->second; // 待优化
+}
+
+string sqlAction::getQueryNumOrder(string& table, unordered_map<string, string>& queryCond) {
+    return "SELECT JSON_OBJECT('total', COUNT(id)) FROM diagnostic_records WHERE doctor_id="
+        + queryCond.find("doctorIdInRecord")->second;
+}
+
+string sqlAction::getTodayQueryNumOrder(string& table, unordered_map<string, string>& queryCond) {
+    return "SELECT JSON_OBJECT('total', COUNT(id)) FROM diagnostic_records WHERE DATE(reception_time)=CURDATE() AND doctor_id=" 
+        + queryCond.find("doctorIdInRecord")->second;
 }
 
 string sqlAction::addRecordOrder(string& table, unordered_map<string, string>& queryCond) {

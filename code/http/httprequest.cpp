@@ -3,8 +3,8 @@ using namespace std;
 
 const string HttpRequest::s_staticPrefix("/static/");
 const unordered_set<string> HttpRequest::DEFAULT_HTML{
-            "/static/welcome", "/static/register", "/static/login",
-             "/static/music", "/static/video", "/static/picture", };
+            "/static/home", "/static/register", "/static/login",
+             "/static/error", "/static/video", "/static/picture", };
 
 const unordered_map<string, int> HttpRequest::DEFAULT_HTML_TAG {
             {"/register.html", 0}, {"/login", 1},  };
@@ -252,7 +252,7 @@ void HttpRequest::ParsePost_() {
                     path_ = "/static/home.html";
                 } 
                 else {
-                    path_ = "/error.html";
+                    path_ = "error.html";
                 }
             }
         }
