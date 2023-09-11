@@ -1,4 +1,17 @@
-基于 Linux 的轻量级高并发 Web 服务器
+基于 Linux 的轻量级高并发 Web 服务器，应用层实现了一个简单的HTTP服务器，提供静态资源访问和数据库访问，用于中医数据采集管理。
 
-# 演示
-<div align=center><img src="https://github.com/Geilouzhong/WebServer/blob/master/root/demo.gif" height="429"/> </div>
+## 演示
+### 登录
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/demonstration%0A/login.gif" height="429"/> </div>
+
+### 添加接诊记录
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/demonstration%0A/addpatient.gif" height="429"/> </div>
+
+### 填写诊断信息
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/demonstration%0A/addDiagnosticRecord.gif" height="429"/> </div>
+
+### 查看接诊记录
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/demonstration%0A/viewRecord.gif" height="429"/> </div>
+
+### 会话过期重新登录
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/blob/master/root/demonstration%0A/Session-expiration.gif" height="429"/> </div>
