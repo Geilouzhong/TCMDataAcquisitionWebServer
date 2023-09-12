@@ -2,16 +2,16 @@
 
 ### 演示
 登录
-<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration%0A/login.gif" height="429"/> </div>
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration/login.gif" height="429"/> </div>
 
 添加接诊记录
-<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration%0A/addpatient.gif" height="429"/> </div>
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration/addpatient.gif" height="429"/> </div>
 
 填写诊断信息
-<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration%0A/addDiagnosticRecord.gif" height="429"/> </div>
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration/addDiagnosticRecord.gif" height="429"/> </div>
 
 查看接诊记录
-<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration%0A/viewRecord.gif" height="429"/> </div>
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration/viewRecord.gif" height="429"/> </div>
 
 会话过期重新登录
-<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration%0A/Session-expiration.gif" height="429"/> </div>
+<div align=center><img src="https://github.com/Geilouzhong/TCMDataAcquisitionWebServer/tree/master/root/static/demonstration/Session-expiration.gif" height="429"/> </div>
